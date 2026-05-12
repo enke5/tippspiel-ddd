@@ -55,6 +55,15 @@ public class JpaMatchPredictionRepository implements MatchPredictionRepository {
         return bonusRepo.lockAllForGroup(groupId);
     }
 
+    @Override
+    @Transactional
+    public void scoreGroupBonusPredictions(String tournamentGroupId,
+                                           String firstTeamId,
+                                           String secondTeamId) {
+        bonusRepo.scoreBothCorrect(tournamentGroupId, firstTeamId, secondTeamId);
+        bonusRepo.scoreOneCorrect(tournamentGroupId, firstTeamId, secondTeamId);
+    }
+
     // ─── Mapping ──────────────────────────────────────────────────────────────
 
     private MatchPrediction toDomain(MatchPredictionJpaEntity e) {

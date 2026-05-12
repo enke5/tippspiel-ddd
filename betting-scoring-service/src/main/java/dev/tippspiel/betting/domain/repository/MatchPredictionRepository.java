@@ -19,4 +19,10 @@ public interface MatchPredictionRepository {
 
     /** Lock all open group bonus predictions for a given tournament group. Returns count locked. */
     int lockGroupBonusPredictions(String groupId);
+
+    /**
+     * Score all locked group bonus predictions for a tournament group.
+     * Exact match (first + second both correct) → 6 pts; one correct → 2 pts.
+     */
+    void scoreGroupBonusPredictions(String tournamentGroupId, String firstTeamId, String secondTeamId);
 }

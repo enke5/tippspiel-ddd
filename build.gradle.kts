@@ -33,4 +33,8 @@ subprojects {
             enabled = false
         }
     }
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
 }

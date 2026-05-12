@@ -20,15 +20,21 @@ public class BettingGroup {
 
     public static BettingGroup create(UUID id, String name, Stake stake, String tournamentRef) {
         if (name == null || name.isBlank()) throw new IllegalArgumentException("Group name required");
-        return new BettingGroup(id, name, stake, tournamentRef);
+        return new BettingGroup(id, name, stake, tournamentRef, Status.OPEN);
     }
 
-    private BettingGroup(UUID id, String name, Stake stake, String tournamentRef) {
+    /** Reconstitution factory — restores a BettingGroup from persisted state (infrastructure use only). */
+    public static BettingGroup reconstitute(UUID id, String name, Stake stake,
+                                            String tournamentRef, Status status) {
+        return new BettingGroup(id, name, stake, tournamentRef, status);
+    }
+
+    private BettingGroup(UUID id, String name, Stake stake, String tournamentRef, Status status) {
         this.id            = id;
         this.name          = name;
         this.stake         = stake;
         this.tournamentRef = tournamentRef;
-        this.status        = Status.OPEN;
+        this.status        = status;
     }
 
     public void close() {
