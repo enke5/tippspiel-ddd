@@ -1,0 +1,52 @@
+[
+  {
+    "name": "UEFA_EURO",
+    "description": "UEFA European Championship group stage tiebreaker rules (EURO 2024)",
+    "criteria": [
+      "POINTS",
+      "HEAD_TO_HEAD_POINTS",
+      "HEAD_TO_HEAD_GOAL_DIFFERENCE",
+      "HEAD_TO_HEAD_GOALS_SCORED",
+      "OVERALL_GOAL_DIFFERENCE",
+      "OVERALL_GOALS_SCORED",
+      "DRAWING_OF_LOTS"
+    ]
+  },
+  {
+    "name": "FIFA_WORLD_CUP",
+    "description": "FIFA World Cup group stage tiebreaker rules (2026)",
+    "criteria": [
+      "POINTS",
+      "OVERALL_GOAL_DIFFERENCE",
+      "OVERALL_GOALS_SCORED",
+      "HEAD_TO_HEAD_POINTS",
+      "HEAD_TO_HEAD_GOAL_DIFFERENCE",
+      "HEAD_TO_HEAD_GOALS_SCORED",
+      "FAIRPLAY_POINTS",
+      "DRAWING_OF_LOTS"
+    ]
+  },
+  {
+    "name": "UEFA_CHAMPIONS_LEAGUE",
+    "description": "UEFA Champions League group stage tiebreaker rules",
+    "criteria": [
+      "POINTS",
+      "HEAD_TO_HEAD_POINTS",
+      "HEAD_TO_HEAD_GOAL_DIFFERENCE",
+      "HEAD_TO_HEAD_GOALS_SCORED",
+      "OVERALL_GOAL_DIFFERENCE",
+      "OVERALL_GOALS_SCORED",
+      "DRAWING_OF_LOTS"
+    ]
+  },
+  {
+    "name": "CUSTOM_POINTS_THEN_GOALS",
+    "description": "Simple tiebreaker: points, then overall goal difference, then goals scored. Suitable for informal tournaments.",
+    "criteria": [
+      "POINTS",
+      "OVERALL_GOAL_DIFFERENCE",
+      "OVERALL_GOALS_SCORED",
+      "DRAWING_OF_LOTS"
+    ]
+  }
+]

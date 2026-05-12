@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: betting-scoring-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/betting_scoring}
+    username: ${DB_USER:tippspiel}
+    password: ${DB_PASSWORD:tippspiel}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: betting-scoring-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "dev.tippspiel.events.tournament"
+        spring.json.value.default.type: "dev.tippspiel.events.tournament.TournamentManagementEvent"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+
+server:
+  port: ${SERVER_PORT:8082}
+
+logging:
+  level:
+    dev.tippspiel: DEBUG
