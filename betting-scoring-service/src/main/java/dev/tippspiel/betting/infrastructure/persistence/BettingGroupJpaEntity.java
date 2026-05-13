@@ -15,6 +15,9 @@ class BettingGroupJpaEntity {
     @Column(nullable = false, length = 100)
     String name;
 
+    @Column(nullable = false, length = 50, unique = true)
+    String slug;
+
     @Column(name = "tournament_ref", nullable = false, length = 50)
     String tournamentRef;
 

@@ -30,6 +30,7 @@ public class BettingCommandService {
         BettingGroup group = BettingGroup.create(
                 id,
                 cmd.name(),
+                cmd.slug(),
                 Stake.of(cmd.stakeAmount(), cmd.stakeCurrency()),
                 cmd.tournamentRef()
         );

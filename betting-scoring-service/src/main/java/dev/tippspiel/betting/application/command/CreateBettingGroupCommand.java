@@ -6,6 +6,7 @@ import java.util.UUID;
 public record CreateBettingGroupCommand(
     UUID       groupId,       // optional — server generates if null
     String     name,
+    String     slug,          // URL-friendly subdomain identifier, e.g. "arbeit"
     BigDecimal stakeAmount,
     String     stakeCurrency, // ISO 4217, e.g. "EUR"
     String     tournamentRef

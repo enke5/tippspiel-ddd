@@ -2,6 +2,7 @@ package dev.tippspiel.betting.api;
 
 import dev.tippspiel.betting.application.settlement.SettlementService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -15,6 +16,7 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/admin/betting-groups")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     private final SettlementService settlementService;

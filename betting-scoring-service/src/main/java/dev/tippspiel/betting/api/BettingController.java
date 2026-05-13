@@ -5,6 +5,7 @@ import dev.tippspiel.betting.application.command.CreateBettingGroupCommand;
 import dev.tippspiel.betting.application.command.JoinBettingGroupCommand;
 import dev.tippspiel.betting.application.command.SubmitPredictionCommand;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -33,16 +34,19 @@ public class BettingController {
 
     record CreateGroupRequest(
         String     name,
+        String     slug,           // URL-friendly subdomain identifier, e.g. "arbeit"
         BigDecimal stakeAmount,
         String     stakeCurrency,   // ISO 4217, e.g. "EUR"
         String     tournamentRef
     ) {}
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> createGroup(@RequestBody CreateGroupRequest req) {
         UUID id = commandService.createBettingGroup(new CreateBettingGroupCommand(
                 null,
                 req.name(),
+                req.slug(),
                 req.stakeAmount(),
                 req.stakeCurrency() != null ? req.stakeCurrency() : "EUR",
                 req.tournamentRef()

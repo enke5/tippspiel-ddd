@@ -6,6 +6,7 @@ import dev.tippspiel.tournament.domain.model.MatchRound;
 import dev.tippspiel.tournament.domain.model.Side;
 import dev.tippspiel.tournament.domain.model.TeamRef;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -23,6 +24,7 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/matches")
+@PreAuthorize("hasRole('ADMIN')")
 public class MatchController {
 
     private final MatchCommandService commandService;

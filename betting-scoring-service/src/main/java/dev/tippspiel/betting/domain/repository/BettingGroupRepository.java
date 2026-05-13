@@ -10,6 +10,8 @@ public interface BettingGroupRepository {
 
     Optional<BettingGroup> findById(UUID id);
 
+    Optional<BettingGroup> findBySlug(String slug);
+
     List<BettingGroup> findAllByTournamentRef(String tournamentRef);
 
     BettingGroup save(BettingGroup group);

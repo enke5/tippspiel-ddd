@@ -24,6 +24,11 @@ public class JpaBettingGroupRepository implements BettingGroupRepository {
     }
 
     @Override
+    public Optional<BettingGroup> findBySlug(String slug) {
+        return jpaRepo.findBySlug(slug).map(this::toDomain);
+    }
+
+    @Override
     public List<BettingGroup> findAllByTournamentRef(String tournamentRef) {
         return jpaRepo.findAllByTournamentRef(tournamentRef).stream()
                 .map(this::toDomain)
@@ -42,6 +47,7 @@ public class JpaBettingGroupRepository implements BettingGroupRepository {
         return BettingGroup.reconstitute(
                 e.id,
                 e.name,
+                e.slug,
                 Stake.of(e.stakeAmount, e.stakeCurrency),
                 e.tournamentRef,
                 BettingGroup.Status.valueOf(e.status)
@@ -52,6 +58,7 @@ public class JpaBettingGroupRepository implements BettingGroupRepository {
         BettingGroupJpaEntity e = new BettingGroupJpaEntity();
         e.id            = g.getId();
         e.name          = g.getName();
+        e.slug          = g.getSlug();
         e.tournamentRef = g.getTournamentRef();
         e.stakeAmount   = g.getStake().amount();
         e.stakeCurrency = g.getStake().currency().getCurrencyCode();
