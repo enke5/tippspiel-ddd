@@ -1,0 +1,63 @@
+{{- $pgHost := printf "%s-postgres-0.%s-postgres" (include "tippspiel.fullname" .) (include "tippspiel.fullname" .) -}}
+{{- $kafkaBootstrap := printf "%s-kafka-0.%s-kafka:9092" (include "tippspiel.fullname" .) (include "tippspiel.fullname" .) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tippspiel.fullname" . }}-tournament
+  labels:
+    {{- include "tippspiel.labels" . | nindent 4 }}
+    app.kubernetes.io/component: tournament
+spec:
+  replicas: {{ .Values.tournament.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "tippspiel.selectorLabels" (dict "component" "tournament" "context" .) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "tippspiel.selectorLabels" (dict "component" "tournament" "context" .) | nindent 8 }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: tournament
+          image: "{{ if .Values.global.imageRegistry }}{{ .Values.global.imageRegistry }}/{{ end }}{{ .Values.tournament.image.repository }}:{{ .Values.tournament.image.tag }}"
+          imagePullPolicy: {{ .Values.tournament.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.tournament.port }}
+              name: http
+          env:
+            - name: SERVER_PORT
+              value: {{ .Values.tournament.port | quote }}
+            - name: DB_URL
+              value: "jdbc:postgresql://{{ $pgHost }}:5432/{{ .Values.postgres.databases.tournament }}"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "tippspiel.fullname" . }}-app
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "tippspiel.fullname" . }}-app
+                  key: DB_PASSWORD
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: {{ $kafkaBootstrap | quote }}
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 6
+          resources:
+            {{- toYaml .Values.tournament.resources | nindent 12 }}

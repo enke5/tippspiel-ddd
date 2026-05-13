@@ -1,0 +1,13 @@
+apiVersion: v2
+name: tippspiel
+description: Tippspiel — DDD-based tournament betting platform (Spring Boot + Kafka + PostgreSQL)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - tippspiel
+  - ddd
+  - spring-boot
+  - kafka
+maintainers:
+  - name: enke5

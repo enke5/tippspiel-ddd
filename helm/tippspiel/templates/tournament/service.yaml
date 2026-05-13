@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tippspiel.fullname" . }}-tournament
+  labels:
+    {{- include "tippspiel.labels" . | nindent 4 }}
+    app.kubernetes.io/component: tournament
+spec:
+  type: {{ .Values.tournament.service.type }}
+  selector:
+    {{- include "tippspiel.selectorLabels" (dict "component" "tournament" "context" .) | nindent 4 }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

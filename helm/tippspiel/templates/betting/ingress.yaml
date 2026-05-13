@@ -1,0 +1,21 @@
+{{- if .Values.betting.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "tippspiel.fullname" . }}-betting
+  labels:
+    {{- include "tippspiel.labels" . | nindent 4 }}
+    app.kubernetes.io/component: betting
+spec:
+  rules:
+    - host: {{ .Values.betting.ingress.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "tippspiel.fullname" . }}-betting
+                port:
+                  name: http
+{{- end }}

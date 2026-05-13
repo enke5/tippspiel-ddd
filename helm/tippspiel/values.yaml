@@ -1,0 +1,77 @@
+# ─── Global ───────────────────────────────────────────────────────────────────
+global:
+  imageRegistry: ""          # override to push to a private registry, e.g. "ghcr.io/enke5"
+  imagePullSecrets: []
+
+# ─── PostgreSQL ───────────────────────────────────────────────────────────────
+postgres:
+  image: postgres:16-alpine
+  storage: 2Gi
+  credentials:
+    user: tippspiel
+    # password injected via Secret; set here only for dev/test
+    password: tippspiel
+  databases:
+    tournament: tournament_management
+    betting:    betting_scoring
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# ─── Kafka ────────────────────────────────────────────────────────────────────
+kafka:
+  image: apache/kafka:3.9.0
+  storage: 2Gi
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+# ─── Tournament Management Service ───────────────────────────────────────────
+tournament:
+  image:
+    repository: tippspiel/tournament-management-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  port: 8081
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: false
+    host: tournament.tippspiel.local
+
+# ─── Betting & Scoring Service ────────────────────────────────────────────────
+betting:
+  image:
+    repository: tippspiel/betting-scoring-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  port: 8082
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: false
+    host: betting.tippspiel.local

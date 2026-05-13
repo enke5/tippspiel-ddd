@@ -1,0 +1,63 @@
+{{- $pgHost := printf "%s-postgres-0.%s-postgres" (include "tippspiel.fullname" .) (include "tippspiel.fullname" .) -}}
+{{- $kafkaBootstrap := printf "%s-kafka-0.%s-kafka:9092" (include "tippspiel.fullname" .) (include "tippspiel.fullname" .) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tippspiel.fullname" . }}-betting
+  labels:
+    {{- include "tippspiel.labels" . | nindent 4 }}
+    app.kubernetes.io/component: betting
+spec:
+  replicas: {{ .Values.betting.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "tippspiel.selectorLabels" (dict "component" "betting" "context" .) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "tippspiel.selectorLabels" (dict "component" "betting" "context" .) | nindent 8 }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: betting
+          image: "{{ if .Values.global.imageRegistry }}{{ .Values.global.imageRegistry }}/{{ end }}{{ .Values.betting.image.repository }}:{{ .Values.betting.image.tag }}"
+          imagePullPolicy: {{ .Values.betting.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.betting.port }}
+              name: http
+          env:
+            - name: SERVER_PORT
+              value: {{ .Values.betting.port | quote }}
+            - name: DB_URL
+              value: "jdbc:postgresql://{{ $pgHost }}:5432/{{ .Values.postgres.databases.betting }}"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "tippspiel.fullname" . }}-app
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "tippspiel.fullname" . }}-app
+                  key: DB_PASSWORD
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: {{ $kafkaBootstrap | quote }}
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 6
+          resources:
+            {{- toYaml .Values.betting.resources | nindent 12 }}

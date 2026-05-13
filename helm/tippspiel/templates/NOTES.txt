@@ -1,0 +1,27 @@
+Tippspiel has been deployed!
+
+Services:
+  Tournament Management: {{ include "tippspiel.fullname" . }}-tournament (port 80 → {{ .Values.tournament.port }})
+  Betting & Scoring:     {{ include "tippspiel.fullname" . }}-betting    (port 80 → {{ .Values.betting.port }})
+
+To port-forward the services locally:
+
+  kubectl port-forward svc/{{ include "tippspiel.fullname" . }}-tournament 8081:80
+  kubectl port-forward svc/{{ include "tippspiel.fullname" . }}-betting    8082:80
+
+API endpoints:
+  Tournament:
+    POST http://localhost:8081/matches
+    POST http://localhost:8081/matches/{id}/fixture
+    POST http://localhost:8081/matches/{id}/start
+    POST http://localhost:8081/matches/{id}/finish
+
+  Betting:
+    POST http://localhost:8082/betting-groups
+    POST http://localhost:8082/betting-groups/{id}/join
+    POST http://localhost:8082/betting-groups/{id}/predictions/match
+    GET  http://localhost:8082/betting-groups/{id}/leaderboard
+    GET  http://localhost:8082/betting-groups/{id}/players/{pid}/predictions
+
+  Admin:
+    POST http://localhost:8082/admin/betting-groups/{id}/settle
