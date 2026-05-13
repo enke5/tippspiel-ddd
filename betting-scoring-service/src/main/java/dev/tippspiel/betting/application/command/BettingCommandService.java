@@ -3,6 +3,7 @@ package dev.tippspiel.betting.application.command;
 import dev.tippspiel.betting.domain.model.*;
 import dev.tippspiel.betting.domain.repository.BettingGroupRepository;
 import dev.tippspiel.betting.domain.repository.MatchPredictionRepository;
+import dev.tippspiel.betting.domain.repository.ParticipationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,13 +12,16 @@ import java.util.UUID;
 @Service
 public class BettingCommandService {
 
-    private final BettingGroupRepository      groupRepository;
-    private final MatchPredictionRepository   predictionRepository;
+    private final BettingGroupRepository    groupRepository;
+    private final ParticipationRepository   participationRepository;
+    private final MatchPredictionRepository predictionRepository;
 
     public BettingCommandService(BettingGroupRepository groupRepository,
+                                 ParticipationRepository participationRepository,
                                  MatchPredictionRepository predictionRepository) {
-        this.groupRepository      = groupRepository;
-        this.predictionRepository = predictionRepository;
+        this.groupRepository         = groupRepository;
+        this.participationRepository = participationRepository;
+        this.predictionRepository    = predictionRepository;
     }
 
     @Transactional
@@ -31,6 +35,22 @@ public class BettingCommandService {
         );
         groupRepository.save(group);
         return group.getId();
+    }
+
+    @Transactional
+    public void joinBettingGroup(JoinBettingGroupCommand cmd) {
+        BettingGroup group = groupRepository.findById(cmd.groupId())
+                .orElseThrow(() -> new IllegalArgumentException("BettingGroup not found: " + cmd.groupId()));
+        if (!group.isOpen()) {
+            throw new IllegalStateException("BettingGroup is closed: " + cmd.groupId());
+        }
+        // Idempotent: do nothing if player already joined
+        if (participationRepository.findByGroupAndPlayer(cmd.groupId(), cmd.playerId()).isPresent()) {
+            return;
+        }
+        Participation participation = Participation.create(
+                UUID.randomUUID(), cmd.groupId(), cmd.playerId(), cmd.displayName());
+        participationRepository.save(participation);
     }
 
     @Transactional

@@ -2,6 +2,7 @@ package dev.tippspiel.betting.api;
 
 import dev.tippspiel.betting.application.command.BettingCommandService;
 import dev.tippspiel.betting.application.command.CreateBettingGroupCommand;
+import dev.tippspiel.betting.application.command.JoinBettingGroupCommand;
 import dev.tippspiel.betting.application.command.SubmitPredictionCommand;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import java.util.UUID;
  * Player REST API for betting actions.
  *
  * POST /betting-groups                             → create a betting group
+ * POST /betting-groups/{id}/join                   → join a betting group
  * POST /betting-groups/{id}/predictions/match      → submit or update a match prediction
  */
 @RestController
@@ -49,6 +51,22 @@ public class BettingController {
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}").buildAndExpand(id).toUri();
         return ResponseEntity.created(location).build();
+    }
+
+    // ─── Join betting group ───────────────────────────────────────────────────
+
+    record JoinGroupRequest(
+        UUID   playerId,
+        String displayName
+    ) {}
+
+    @PostMapping("/{id}/join")
+    public ResponseEntity<Void> joinGroup(@PathVariable UUID id,
+                                          @RequestBody JoinGroupRequest req) {
+        commandService.joinBettingGroup(new JoinBettingGroupCommand(
+                id, req.playerId(), req.displayName()
+        ));
+        return ResponseEntity.noContent().build();
     }
 
     // ─── Submit match prediction ──────────────────────────────────────────────
