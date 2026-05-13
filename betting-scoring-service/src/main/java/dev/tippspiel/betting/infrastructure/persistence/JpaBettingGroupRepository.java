@@ -5,6 +5,7 @@ import dev.tippspiel.betting.domain.model.Stake;
 import dev.tippspiel.betting.domain.repository.BettingGroupRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,6 +21,13 @@ public class JpaBettingGroupRepository implements BettingGroupRepository {
     @Override
     public Optional<BettingGroup> findById(UUID id) {
         return jpaRepo.findById(id).map(this::toDomain);
+    }
+
+    @Override
+    public List<BettingGroup> findAllByTournamentRef(String tournamentRef) {
+        return jpaRepo.findAllByTournamentRef(tournamentRef).stream()
+                .map(this::toDomain)
+                .toList();
     }
 
     @Override

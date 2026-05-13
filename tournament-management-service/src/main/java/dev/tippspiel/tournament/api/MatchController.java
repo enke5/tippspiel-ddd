@@ -92,7 +92,8 @@ public class MatchController {
     record FinishMatchRequest(
         int     goalsHome,
         int     goalsAway,
-        String  phase           // MatchPhase name, e.g. "REGULAR_TIME"
+        String  phase,          // MatchPhase name, e.g. "REGULAR_TIME"
+        String  tournamentRef   // e.g. "UEFA_EURO_2024" — required for FINAL settlement
     ) {}
 
     @PostMapping("/{id}/finish")
@@ -102,7 +103,8 @@ public class MatchController {
                 id,
                 req.goalsHome(),
                 req.goalsAway(),
-                MatchPhase.valueOf(req.phase())
+                MatchPhase.valueOf(req.phase()),
+                req.tournamentRef()
         ));
         return ResponseEntity.noContent().build();
     }

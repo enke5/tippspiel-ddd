@@ -8,5 +8,6 @@ public record FinishMatchCommand(
     UUID matchId,
     int goalsHome,
     int goalsAway,
-    MatchPhase phase
+    MatchPhase phase,
+    String tournamentRef   // forwarded to MatchFinished event for settlement routing
 ) {}

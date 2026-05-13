@@ -13,6 +13,7 @@ public record MatchFinished(
     UUID eventId,
     Instant occurredAt,
     UUID matchId,
+    String tournamentRef,        // e.g. "UEFA_EURO_2024"
     EventTypes.MatchRound round,
     String groupId,              // null for knockout rounds
     EventTypes.TeamRef homeTeam,

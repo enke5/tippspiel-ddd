@@ -78,7 +78,8 @@ public class MatchCommandService {
         kafka.send(TOPIC, match.getId().toString(),
             new MatchFinished(
                 UUID.randomUUID(), Instant.now(),
-                match.getId(), toEventRound(match.getRound()),
+                match.getId(), cmd.tournamentRef(),
+                toEventRound(match.getRound()),
                 match.getGroupId(),
                 toEventTeam(match.getHomeTeam()),
                 toEventTeam(match.getAwayTeam()),

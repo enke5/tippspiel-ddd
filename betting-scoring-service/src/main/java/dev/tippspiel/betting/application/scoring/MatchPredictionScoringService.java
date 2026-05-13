@@ -3,6 +3,7 @@ package dev.tippspiel.betting.application.scoring;
 import dev.tippspiel.betting.domain.model.MatchPrediction;
 import dev.tippspiel.betting.domain.model.PredictedScore;
 import dev.tippspiel.betting.domain.repository.MatchPredictionRepository;
+import dev.tippspiel.betting.domain.repository.ParticipationRepository;
 import dev.tippspiel.events.tournament.EventTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +32,12 @@ public class MatchPredictionScoringService {
     private static final Logger log = LoggerFactory.getLogger(MatchPredictionScoringService.class);
 
     private final MatchPredictionRepository repository;
+    private final ParticipationRepository   participationRepository;
 
-    public MatchPredictionScoringService(MatchPredictionRepository repository) {
-        this.repository = repository;
+    public MatchPredictionScoringService(MatchPredictionRepository repository,
+                                         ParticipationRepository participationRepository) {
+        this.repository              = repository;
+        this.participationRepository = participationRepository;
     }
 
     // ─── Match predictions ────────────────────────────────────────────────────
@@ -49,6 +53,16 @@ public class MatchPredictionScoringService {
             int points = computeMatchPoints(p.getPredictedScore(), officialScore, round);
             p.score(points);
             repository.save(p);
+
+            // Accumulate points on the Participation
+            if (points > 0) {
+                participationRepository
+                        .findByGroupAndPlayer(p.getBettingGroupId(), p.getPlayerId())
+                        .ifPresent(participation -> {
+                            participation.addPoints(points);
+                            participationRepository.save(participation);
+                        });
+            }
             scored++;
         }
         log.info("Scored {} predictions for match {} — result {}:{} ({})",

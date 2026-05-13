@@ -1,6 +1,9 @@
 package dev.tippspiel.betting.application.eventhandler;
 
 import dev.tippspiel.betting.application.scoring.MatchPredictionScoringService;
+import dev.tippspiel.betting.application.settlement.SettlementService;
+import dev.tippspiel.betting.domain.model.BettingGroup;
+import dev.tippspiel.betting.domain.repository.BettingGroupRepository;
 import dev.tippspiel.betting.domain.repository.MatchPredictionRepository;
 import dev.tippspiel.events.tournament.*;
 import org.slf4j.Logger;
@@ -23,11 +26,17 @@ public class TournamentEventHandler {
 
     private final MatchPredictionRepository     predictionRepository;
     private final MatchPredictionScoringService scoringService;
+    private final BettingGroupRepository        groupRepository;
+    private final SettlementService             settlementService;
 
     public TournamentEventHandler(MatchPredictionRepository predictionRepository,
-                                  MatchPredictionScoringService scoringService) {
+                                  MatchPredictionScoringService scoringService,
+                                  BettingGroupRepository groupRepository,
+                                  SettlementService settlementService) {
         this.predictionRepository = predictionRepository;
         this.scoringService       = scoringService;
+        this.groupRepository      = groupRepository;
+        this.settlementService    = settlementService;
     }
 
     @KafkaListener(
@@ -66,6 +75,18 @@ public class TournamentEventHandler {
                 event.score().goalsHome(), event.score().goalsAway());
 
         scoringService.scoreMatchPredictions(event.matchId(), event.score(), event.round());
+
+        // When the Final is played, auto-settle all betting groups for this tournament
+        if (event.round() == EventTypes.MatchRound.FINAL) {
+            log.info("FINAL finished — triggering automatic settlement for all groups in tournament");
+            groupRepository.findAllByTournamentRef(event.tournamentRef())
+                    .stream()
+                    .filter(BettingGroup::isOpen)
+                    .forEach(g -> {
+                        log.info("Auto-settling BettingGroup {}", g.getId());
+                        settlementService.settle(g.getId());
+                    });
+        }
     }
 
     private void onGroupCompleted(TournamentGroupCompleted event) {
