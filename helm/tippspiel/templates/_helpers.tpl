@@ -22,6 +22,14 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Keycloak issuer URI — used as KEYCLOAK_ISSUER_URI in app Deployments.
+Points to the internal ClusterIP Service so apps validate tokens without leaving the cluster.
+*/}}
+{{- define "tippspiel.keycloakIssuerUri" -}}
+{{- printf "http://%s-keycloak:%d/realms/%s" (include "tippspiel.fullname" .) (.Values.keycloak.port | int) .Values.keycloak.realmName -}}
+{{- end }}
+
+{{/*
 Selector labels for a given component
 Usage: include "tippspiel.selectorLabels" (dict "component" "tournament" "context" .)
 */}}

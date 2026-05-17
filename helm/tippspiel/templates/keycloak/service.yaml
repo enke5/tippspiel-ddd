@@ -1,0 +1,33 @@
+# ClusterIP Service — used by app pods to reach Keycloak internally
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tippspiel.fullname" . }}-keycloak
+  labels:
+    {{- include "tippspiel.labels" . | nindent 4 }}
+    app.kubernetes.io/component: keycloak
+spec:
+  type: {{ .Values.keycloak.service.type }}
+  selector:
+    {{- include "tippspiel.selectorLabels" (dict "component" "keycloak" "context" .) | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ .Values.keycloak.port }}
+      targetPort: http
+---
+# Headless Service — required by StatefulSet
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tippspiel.fullname" . }}-keycloak-headless
+  labels:
+    {{- include "tippspiel.labels" . | nindent 4 }}
+    app.kubernetes.io/component: keycloak
+spec:
+  clusterIP: None
+  selector:
+    {{- include "tippspiel.selectorLabels" (dict "component" "keycloak" "context" .) | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ .Values.keycloak.port }}
+      targetPort: http

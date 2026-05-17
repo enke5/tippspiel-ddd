@@ -45,6 +45,8 @@ spec:
                   key: DB_PASSWORD
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: {{ $kafkaBootstrap | quote }}
+            - name: KEYCLOAK_ISSUER_URI
+              value: {{ include "tippspiel.keycloakIssuerUri" . | quote }}
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness

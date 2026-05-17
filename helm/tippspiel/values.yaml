@@ -75,3 +75,26 @@ betting:
   ingress:
     enabled: false
     host: betting.tippspiel.local
+
+# ─── Keycloak ─────────────────────────────────────────────────────────────────
+keycloak:
+  image: quay.io/keycloak/keycloak:26.0
+  # adminCredentials — override in production via --set or a sealed secret
+  adminUser: admin
+  adminPassword: admin
+  realmName: tippspiel
+  # Internal HTTP port (non-TLS — TLS terminated at ingress)
+  port: 8080
+  storage: 1Gi
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: false
+    host: auth.tippspiel.local

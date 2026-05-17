@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "tippspiel.fullname" . }}-keycloak
+  labels:
+    {{- include "tippspiel.labels" . | nindent 4 }}
+    app.kubernetes.io/component: keycloak
+spec:
+  serviceName: {{ include "tippspiel.fullname" . }}-keycloak-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "tippspiel.selectorLabels" (dict "component" "keycloak" "context" .) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "tippspiel.selectorLabels" (dict "component" "keycloak" "context" .) | nindent 8 }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: keycloak
+          image: {{ .Values.keycloak.image | quote }}
+          args: ["start-dev", "--http-port={{ .Values.keycloak.port }}"]
+          ports:
+            - containerPort: {{ .Values.keycloak.port }}
+              name: http
+          env:
+            - name: KEYCLOAK_ADMIN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "tippspiel.fullname" . }}-keycloak
+                  key: KEYCLOAK_ADMIN
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "tippspiel.fullname" . }}-keycloak
+                  key: KEYCLOAK_ADMIN_PASSWORD
+            # Persist H2 data to the PVC so the realm survives pod restarts
+            - name: KC_DB
+              value: dev-file
+            - name: KC_DATA_DIR
+              value: /opt/keycloak/data
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 90
+            periodSeconds: 20
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 6
+          resources:
+            {{- toYaml .Values.keycloak.resources | nindent 12 }}
+          volumeMounts:
+            - name: keycloak-data
+              mountPath: /opt/keycloak/data
+  volumeClaimTemplates:
+    - metadata:
+        name: keycloak-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.keycloak.storage }}

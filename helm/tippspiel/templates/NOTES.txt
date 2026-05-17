@@ -3,11 +3,13 @@ Tippspiel has been deployed!
 Services:
   Tournament Management: {{ include "tippspiel.fullname" . }}-tournament (port 80 → {{ .Values.tournament.port }})
   Betting & Scoring:     {{ include "tippspiel.fullname" . }}-betting    (port 80 → {{ .Values.betting.port }})
+  Keycloak:              {{ include "tippspiel.fullname" . }}-keycloak   (port {{ .Values.keycloak.port }})
 
 To port-forward the services locally:
 
   kubectl port-forward svc/{{ include "tippspiel.fullname" . }}-tournament 8081:80
   kubectl port-forward svc/{{ include "tippspiel.fullname" . }}-betting    8082:80
+  kubectl port-forward svc/{{ include "tippspiel.fullname" . }}-keycloak   8080:{{ .Values.keycloak.port }}
 
 API endpoints:
   Tournament:
